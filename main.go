@@ -1,22 +1,18 @@
-// main.go
 package main
 
-import (
-	"syscall/js"
-)
-
-func add(this js.Value, p []js.Value) interface{} {
-    sum := p[0].Int() + p[1].Int()
-    return js.ValueOf(sum)
-}
-
-func registerCallbacks() {
-    js.Global().Set("add", js.FuncOf(add))
-}
+import "syscall/js"
 
 func main() {
-    c := make(chan struct{}, 0)
-    println("Wasm Go Initialized")
-    registerCallbacks()
-    <-c
+	println("Wasm loaded.")
+
+	alert := js.Global().Get("alert")
+
+	alert.Invoke("Hello Wasm!")
 }
+
+func Add(x int, y int) int {
+	return x + y
+}
+
+// GOOS=js GOARCH=wasm go build -o main.wasm main.go
+// cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" .

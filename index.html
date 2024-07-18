@@ -1,21 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Go WebAssembly Example</title>
+    <meta charset="utf-8" />
+    <title>Go wasm</title>
   </head>
+
   <body>
-    <h1>Go WebAssembly Example</h1>
+    <script src="wasm_exec.js"></script>
     <script>
+      if (!WebAssembly.instantiateStreaming) {
+        WebAssembly.instantiateStreaming = async (resp, importObject) => {
+          const source = await (await resp).arrayBuffer();
+          return await WebAssembly.instantiate(source, importObject);
+        };
+      }
+
       const go = new Go();
-      WebAssembly.instantiateStreaming(
-        fetch("main.wasm"),
-        go.importObject
-      ).then((result) => {
-        go.run(result.instance);
-        console.log("2 + 3 =", add(2, 3));
-      });
+      let mod, inst;
+      WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
+        .then((result) => {
+          mod = result.module;
+          inst = result.instance;
+          document.getElementById("runButton").disabled = false;
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+
+      async function run() {
+        console.clear();
+        await go.run(inst);
+        inst = await WebAssembly.instantiate(mod, go.importObject);
+      }
+
+      async function add(x, y) {
+        console.log(123);
+        const result = await inst.exports.Add(x, y);
+        console.log(`add(${x}, ${y}) = ${result}`);
+        inst = await WebAssembly.instantiate(mod, go.importObject);
+      }
     </script>
+
+    <button onClick="run();" id="runButton" disabled>Run</button>
+    <button onClick="add(1,2);" id="addButton">Run</button>
   </body>
 </html>

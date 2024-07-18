@@ -1,8 +1,9 @@
 {
-  "gopls": {
-    "build.env": {
-      "GOOS": "js",
-      "GOARCH": "wasm"
-    }
-  }
+  "go.toolsEnvVars": {
+    "GOOS": "js",
+    "GOARCH": "wasm",
+    "GOROOT": "/usr/local/go",
+    "GOPATH": "/home/corey/src/goprojects"
+  },
+  "go.installDependenciesWhenBuilding": false
 }
